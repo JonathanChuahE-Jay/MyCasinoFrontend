@@ -1,0 +1,6 @@
+export type { SlotPlayResponseType as PlayResult } from './slotPlay.ts'
+export type { SlotMachineResponseType as SlotMachine } from './slotMachine.ts'
+export type { SlotSymbolResponseType } from './slotSymbol.ts'
+export type { SlotJackpotResponseType } from './slotJackpot.ts'
+export type { SlotFreeSpinSessionResponseType, StartFreeSpinResponseType } from './slotFreeSpinSession.ts'
+export type { FreeSpinOptionType as FreespinOption } from '#/schemas/slots/slot-machine-schema.ts'

@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mcfrontend",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["dev", "--port", "7343"],
+      "port": 7343
+    }
+  ]
+}
