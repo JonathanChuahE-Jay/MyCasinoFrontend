@@ -1,6 +1,6 @@
-import { useCallback, useRef, useState } from 'react'
 import { animate } from 'motion'
 import placeholder from '#/assets/common/slot-machine.png'
+import React from 'react'
 
 const STRIP_LENGTH = 40
 
@@ -36,16 +36,16 @@ interface SlotReelProps {
 }
 
 export function SlotMachineReel({ rows, symbolSize, symbolImages, reelRef }: SlotReelProps) {
-  const stripEl = useRef<HTMLDivElement | null>(null)
-  const animRef = useRef<{ stop: () => void } | null>(null)
-  const symbolImagesRef = useRef<string[]>(symbolImages)
+  const stripEl = React.useRef<HTMLDivElement | null>(null)
+  const animRef = React.useRef<{ stop: () => void } | null>(null)
+  const symbolImagesRef = React.useRef<string[]>(symbolImages)
   symbolImagesRef.current = symbolImages
 
-  const [strip, setStrip] = useState<string[]>(() => Array(STRIP_LENGTH).fill(placeholder))
-  const [goldStrip, setGoldStrip] = useState<boolean[]>(() => Array(STRIP_LENGTH).fill(false))
+  const [strip, setStrip] = React.useState<string[]>(() => Array(STRIP_LENGTH).fill(placeholder))
+  const [goldStrip, setGoldStrip] = React.useState<boolean[]>(() => Array(STRIP_LENGTH).fill(false))
 
-  const spinTo = useCallback(
-    (resultSymbols: string[], resultGoldCol: boolean[], onDone: () => void) => {
+  const spinTo = React.useCallback(
+    (resultSymbols: string[], resultGoldCol: boolean[], onDone: () => void, snap = false) => {
       if (!stripEl.current) return
       if (animRef.current) animRef.current.stop()
 
@@ -60,23 +60,24 @@ export function SlotMachineReel({ rows, symbolSize, symbolImages, reelRef }: Slo
       setGoldStrip(buildGoldCoilStrip(STRIP_LENGTH - rows, goldTail))
 
       const targetY = -((newStrip.length - rows) * symbolSize)
-      const anim = animate(stripEl.current, { y: [0, targetY] }, { duration: 2.4, ease: [0.1, 0, 0.15, 1] })
+      const duration = snap ? 0.4 : 2.4
+      const ease: [number, number, number, number] = snap ? [0.2, 0, 0.1, 1] : [0.1, 0, 0.15, 1]
+      const anim = animate(stripEl.current, { y: [0, targetY] }, { duration, ease })
       animRef.current = anim
-      anim.then(onDone)
+      anim.then(() => {
+        animRef.current = null
+        onDone()
+      })
     },
     [rows, symbolSize],
   )
 
-  const stopImmediate = useCallback(() => {
-    if (animRef.current) animRef.current.stop()
-  }, [])
-
-  const setRef = useCallback(
+  const setRef = React.useCallback(
     (el: HTMLDivElement | null) => {
-      ;(stripEl as React.MutableRefObject<HTMLDivElement | null>).current = el
-      reelRef(el ? { spinTo, stopImmediate } : null)
+      stripEl.current = el
+      reelRef(el ? { spinTo } : null)
     },
-    [spinTo, stopImmediate, reelRef],
+    [spinTo, reelRef],
   )
 
   const midRow = Math.floor(rows / 2)

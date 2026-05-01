@@ -1,9 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { Spade } from 'lucide-react'
 import { useAppForm } from '#/components/form'
 import { useLoginMutation } from '#/queries/auth/login.ts'
 import type { LoginType } from '#/schemas/auth/login.ts'
 import { loginSchema } from '#/schemas/auth/login.ts'
+import logo from '#/assets/common/logo.png'
 
 export const Route = createFileRoute('/(unauthenticated)/(auth)/login')({
   component: LoginPage,
@@ -26,9 +26,7 @@ function LoginPage() {
     <div className="min-h-screen flex items-center justify-center px-4 py-8">
       <div className="casino-card rounded-2xl p-8 w-full max-w-sm rise-in">
         <div className="flex flex-col items-center mb-8">
-          <div className="casino-emblem mb-4">
-            <Spade className="size-7" fill="currentColor" />
-          </div>
+          <img src={logo} alt="logo" className="casino-emblem mb-4" />
           <h1 className="display-title text-3xl font-bold tracking-wide text-foreground">
             Welcome Back
           </h1>

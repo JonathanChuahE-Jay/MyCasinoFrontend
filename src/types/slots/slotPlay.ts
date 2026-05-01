@@ -49,6 +49,20 @@ export type SlotPlayJackpotResponseType =
     }
   | null
 
+export interface SlotSpinCalculationEntry {
+  symbol_name: string
+  matched_cols: number
+  total_have: number
+  min_cols_to_win: number
+  initial_credit_won: string
+  extra_symbol_won: string
+  surplus: number
+  bet_multiplier: string
+  wildcard_multiplier: number | null
+  credits_won: string
+  wildcard_involved: boolean
+}
+
 export interface SlotPlayResponseType {
   grid: number[][]
   credits_won: string
@@ -57,4 +71,5 @@ export interface SlotPlayResponseType {
   purchased_wildcard_cols: number[]
   gold: SlotPlayGoldResponseType
   jackpot: SlotPlayJackpotResponseType
+  calculation: SlotSpinCalculationEntry[]
 }

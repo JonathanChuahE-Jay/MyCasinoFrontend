@@ -1,4 +1,4 @@
-export type { SlotPlayResponseType as PlayResult } from './slotPlay.ts'
+export type { SlotPlayResponseType as PlayResult, SlotSpinCalculationEntry } from './slotPlay.ts'
 export type { SlotMachineResponseType as SlotMachine } from './slotMachine.ts'
 export type { SlotSymbolResponseType } from './slotSymbol.ts'
 export type { SlotJackpotResponseType } from './slotJackpot.ts'

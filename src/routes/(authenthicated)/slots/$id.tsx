@@ -40,6 +40,9 @@ function SlotMachinePage() {
     setSelectedWildcard,
     reelRefs,
     handleSpin,
+    startAutoSpin,
+    isAutoSpinning,
+    freeSpinsRemaining,
     setFreespinOptions,
     setJackpotSession,
   } = useSlotMachine(id)
@@ -76,7 +79,7 @@ function SlotMachinePage() {
 
         <div className="slot-layout">
           <div className="casino-card rounded-2xl overflow-hidden">
-            <SlotMachineHeader result={result} showResult={showResult} machine={machine} />
+            <SlotMachineHeader machine={machine} />
             <div className="flex flex-col items-center gap-5 px-4 py-6">
               <div className="flex gap-1.5 overflow-x-auto py-1 max-w-full">
                 {Array.from({ length: cols }).map((_, colIdx) => (
@@ -94,8 +97,12 @@ function SlotMachinePage() {
               <SlotMachineSpinButton
                 handleSpin={handleSpin}
                 spinning={spinning}
+                isAutoSpinning={isAutoSpinning}
+                freeSpinsRemaining={freeSpinsRemaining}
               />
             </div>
+
+            <SlotMachineWinBanner result={result} showResult={showResult} />
           </div>
 
           <div className="flex flex-col gap-3.5">
@@ -126,7 +133,10 @@ function SlotMachinePage() {
           <SlotMachineFreespinModal
             options={freespinOptions}
             machineId={id}
-            onConfigured={() => setFreespinOptions(null)}
+            onConfigured={(session) => {
+              setFreespinOptions(null)
+              startAutoSpin(session.spins_remaining ?? session.free_spins_awarded)
+            }}
             onClose={() => setFreespinOptions(null)}
           />
         )}

@@ -1,6 +1,5 @@
 import { z } from 'zod/v4'
-import { createSlotSymbolSchema } from '#/schemas/slots/slot-symbol-schema.ts'
-import { slotJackpotSchema } from '#/schemas/slots/slot-jackpot-schema.ts'
+// import { createSlotSymbolSchema } from '#/schemas/slots/slot-symbol-schema.ts'
 
 
 export const creditPerSpinOptionSchema = z.object({
@@ -32,7 +31,7 @@ export const freeSpinTierSchema = z.object({
 
 export const slotMachineSchema = z.object({
   name: z.string().max(100),
-  image: z.string().nullable().optional(),
+  image: z.union([z.instanceof(File), z.string()]).nullable().optional(),
   cols: z.number().int().min(1),
   rows: z.number().int().min(1),
   total_winrate: z.number().int().min(1),
@@ -50,15 +49,16 @@ export const slotMachineSchema = z.object({
   free_spin_assist_chance: z.string(),
   free_spin_stack_winrate: z.string(),
   break_accidental_win_attempts: z.number().int().min(0),
+  machine_reel_sound: z.union([z.instanceof(File), z.string()]).nullable().optional(),
 })
 
-export const slotMachineFullCreateSchema = z.object({
-  machine: slotMachineSchema,
-  symbols: z.array(createSlotSymbolSchema.omit({ machine: true })).optional().default([]),
-  jackpots: z.array(slotJackpotSchema.omit({ machine: true })).optional().default([]),
-})
-
-export type SlotMachineFullCreateType = z.infer<typeof slotMachineFullCreateSchema>
+// export const slotMachineFullCreateSchema = z.object({
+//   machine: slotMachineSchema,
+//   symbols: z.array(createSlotSymbolSchema.omit({ machine: true })).optional().default([]),
+//   jackpots: z.array(slotJackpotSchema.omit({ machine: true })).optional().default([]),
+// })
+//
+// export type SlotMachineFullCreateType = z.infer<typeof slotMachineFullCreateSchema>
 
 export type CreditPerSpinOptionType = z.infer<typeof creditPerSpinOptionSchema>
 export type WildcardColOptionType = z.infer<typeof wildcardColOptionSchema>

@@ -2,12 +2,12 @@ import { motion } from 'motion/react'
 import { Star, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { useStartFreeSpin } from '#/queries/slots'
-import type { FreespinOption } from '#/types/slots'
+import type { FreespinOption, StartFreeSpinResponseType } from '#/types/slots'
 
 interface FreespinModalProps {
   options: FreespinOption[]
   machineId: string
-  onConfigured: () => void
+  onConfigured: (session: StartFreeSpinResponseType) => void
   onClose: () => void
 }
 
@@ -16,9 +16,9 @@ export function SlotMachineFreespinModal({ options, machineId, onConfigured, onC
 
   async function handleSelect(idx: number) {
     try {
-      await startMutation.mutateAsync({ option_index: idx })
-      toast.success('Free spins configured! Spin to start.')
-      onConfigured()
+      const session = await startMutation.mutateAsync({ option_index: idx })
+      toast.success('Free spins configured! Auto-spinning now.')
+      onConfigured(session)
     } catch {
       toast.error('Failed to configure free spins')
     }
@@ -32,13 +32,19 @@ export function SlotMachineFreespinModal({ options, machineId, onConfigured, onC
         className="casino-card rounded-[1.25rem] p-6 max-w-[400px] w-full"
       >
         <div className="flex justify-between items-start mb-4">
-          <div>
-            <Star size={32} className="text-amber-400 mb-1 block" />
-            <div className="display-title text-xl font-black">Free Spins Triggered!</div>
-            <p className="text-[var(--casino-text-soft)] text-[0.82rem] mt-1">
-              Choose your free spin package
-            </p>
+          <div className="flex items-start gap-2">
+            <Star size={32} className="text-amber-400 mt-1" />
+
+            <div className="flex flex-col">
+              <div className="display-title text-lg font-black">
+                Free Spins Triggered!
+              </div>
+              <p className="text-[var(--casino-text-soft)] text-[0.82rem]">
+                Choose your free spin package
+              </p>
+            </div>
           </div>
+
           <button
             onClick={onClose}
             className="bg-transparent border-none text-[var(--casino-text-mute)] cursor-pointer"
@@ -56,7 +62,9 @@ export function SlotMachineFreespinModal({ options, machineId, onConfigured, onC
               className="p-[0.9rem_1rem] rounded-[0.625rem] border border-[var(--casino-line)] bg-white/[0.03] text-[var(--casino-text)] cursor-pointer flex justify-between items-center text-left disabled:opacity-50"
             >
               <div>
-                <div className="font-bold text-[0.95rem]">{opt.free_spins} Free Spins</div>
+                <div className="font-bold text-[0.95rem]">
+                  {opt.free_spins} Free Spins
+                </div>
                 <div className="text-[0.78rem] text-[var(--casino-text-mute)] mt-0.5">
                   ×{opt.wild_card_multiplier.join('/')} wildcard multiplier
                 </div>

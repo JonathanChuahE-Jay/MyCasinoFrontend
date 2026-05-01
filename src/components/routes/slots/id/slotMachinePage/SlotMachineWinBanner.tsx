@@ -24,7 +24,7 @@ const SlotMachineWinBanner = ({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.85 }}
           className={[
-            'flex items-center gap-2 px-6 py-1 rounded-full text-[0.95rem] font-bold border',
+            'flex items-center gap-2 px-6 py-1 rounded-lg text-[0.95rem] font-bold border my-3 mx-3',
             isWin
               ? 'bg-green-500/10 border-green-500/40 text-green-400'
               : 'bg-red-600/8 border-red-600/25 text-[var(--casino-red-bright)]',

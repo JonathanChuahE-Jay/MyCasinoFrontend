@@ -38,10 +38,27 @@ export function useSlotMachine(machineId: string) {
   const [jackpotSession, setJackpotSession] =
     React.useState<JackpotSession | null>(null)
 
+  const audioRef = React.useRef<HTMLAudioElement | null>(null)
   const spinIdRef = React.useRef(0)
+  const spinningRef = React.useRef(false)
   const pendingTimeoutsRef = React.useRef<ReturnType<typeof setTimeout>[]>([])
-  const pendingResultRef = React.useRef<{ result: PlayResult; spinId: number } | null>(null)
+  const pendingResultRef = React.useRef<{
+    result: PlayResult
+    spinId: number
+    colSymbols: string[][]
+    colGolds: boolean[][]
+  } | null>(null)
   const finishCalledRef = React.useRef(-1)
+  const isAutoSpinningRef = React.useRef(false)
+  const freeSpinsRemainingRef = React.useRef(0)
+  const autoSpinTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  )
+  const handleSpinRef = React.useRef<() => Promise<void>>(() =>
+    Promise.resolve(),
+  )
+  const [isAutoSpinning, setIsAutoSpinning] = React.useState(false)
+  const [freeSpinsRemaining, setFreeSpinsRemaining] = React.useState(0)
 
   const symbolMap = React.useMemo(() => {
     const map = new Map<string, string>()
@@ -82,10 +99,15 @@ export function useSlotMachine(machineId: string) {
     creditOptions[0]
 
   function finishSpin(playResult: PlayResult, spinId: number) {
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+    }
     if (spinId !== spinIdRef.current) return
     if (finishCalledRef.current === spinId) return
     finishCalledRef.current = spinId
     pendingResultRef.current = null
+    spinningRef.current = false
 
     setSpinning(false)
     setResult(playResult)
@@ -110,21 +132,75 @@ export function useSlotMachine(machineId: string) {
         session_id: playResult.jackpot.session_id ?? '',
       })
     }
+
+    if (isAutoSpinningRef.current) {
+      freeSpinsRemainingRef.current--
+      setFreeSpinsRemaining(freeSpinsRemainingRef.current)
+      if (freeSpinsRemainingRef.current > 0) {
+        autoSpinTimerRef.current = setTimeout(() => {
+          autoSpinTimerRef.current = null
+          handleSpinRef.current()
+        }, 2000)
+      } else {
+        isAutoSpinningRef.current = false
+        setIsAutoSpinning(false)
+      }
+    }
+  }
+
+  function startAutoSpin(spinsRemaining: number) {
+    if (spinsRemaining <= 0) return
+    freeSpinsRemainingRef.current = spinsRemaining
+    isAutoSpinningRef.current = true
+    setIsAutoSpinning(true)
+    setFreeSpinsRemaining(spinsRemaining)
+    handleSpinRef.current()
   }
 
   async function handleSpin() {
     if (!machine) return
 
-    // If spinning and result already arrived: stop all reels and show result now
-    if (spinning) {
-      if (pendingResultRef.current) {
+    if (!audioRef.current && machine.machine_reel_sound) {
+      audioRef.current = new Audio(machine.machine_reel_sound as string)
+      audioRef.current.loop = true
+    }
+
+    if (spinningRef.current) {
+      const pending = pendingResultRef.current
+      if (pending) {
         pendingTimeoutsRef.current.forEach(clearTimeout)
         pendingTimeoutsRef.current = []
-        reelRefs.current.forEach((reel) => reel?.stopImmediate())
-        const { result: pendingResult, spinId } = pendingResultRef.current
-        finishSpin(pendingResult, spinId)
+        pendingResultRef.current = null
+        const { result: pendingResult, spinId, colSymbols, colGolds } = pending
+        let doneCount = 0
+        const snapCols = reelRefs.current.length || cols
+        reelRefs.current.forEach((reel, colIdx) => {
+          if (!reel) {
+            doneCount++
+            if (doneCount === snapCols) finishSpin(pendingResult, spinId)
+            return
+          }
+          reel.spinTo(
+            colSymbols[colIdx] ?? [],
+            colGolds[colIdx] ?? Array(rows).fill(false),
+            () => {
+              doneCount++
+              if (doneCount === snapCols) finishSpin(pendingResult, spinId)
+            },
+            true,
+          )
+        })
+        if (audioRef.current) {
+          audioRef.current.pause()
+          audioRef.current.currentTime = 0
+        }
       }
       return
+    }
+
+    if (autoSpinTimerRef.current !== null) {
+      clearTimeout(autoSpinTimerRef.current)
+      autoSpinTimerRef.current = null
     }
 
     const credit = selectedCredit ?? creditOptions[0]?.credit_per_spin
@@ -135,10 +211,16 @@ export function useSlotMachine(machineId: string) {
     pendingResultRef.current = null
 
     const currentSpinId = ++spinIdRef.current
+    spinningRef.current = true
 
     setSpinning(true)
     setShowResult(false)
     setResult(null)
+
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0
+      audioRef.current.play().catch(() => {})
+    }
 
     let playResult: PlayResult | null = null
 
@@ -153,6 +235,7 @@ export function useSlotMachine(machineId: string) {
       await invalidateUser()
     } catch (e) {
       if (currentSpinId !== spinIdRef.current) return
+      spinningRef.current = false
       setSpinning(false)
 
       const { available_options } = await handleApiError(e)
@@ -167,8 +250,6 @@ export function useSlotMachine(machineId: string) {
 
     if (currentSpinId !== spinIdRef.current) return
 
-    pendingResultRef.current = { result: playResult, spinId: currentSpinId }
-
     const colSymbols = mapGrid(playResult.grid, symbolMap, wildcardImg)
 
     const colGolds = Array.from({ length: cols }, (_, c) =>
@@ -177,6 +258,13 @@ export function useSlotMachine(machineId: string) {
         (_, r) => playResult!.gold.gold_grid[r]?.[c] ?? false,
       ),
     )
+
+    pendingResultRef.current = {
+      result: playResult,
+      spinId: currentSpinId,
+      colSymbols,
+      colGolds,
+    }
 
     let doneCount = 0
     reelRefs.current.forEach((reel, colIdx) => {
@@ -200,6 +288,8 @@ export function useSlotMachine(machineId: string) {
     })
   }
 
+  handleSpinRef.current = handleSpin
+
   return {
     machine,
     isLoading,
@@ -222,6 +312,9 @@ export function useSlotMachine(machineId: string) {
     setSelectedWildcard,
     reelRefs,
     handleSpin,
+    startAutoSpin,
+    isAutoSpinning,
+    freeSpinsRemaining,
     setFreespinOptions,
     setJackpotSession,
   }

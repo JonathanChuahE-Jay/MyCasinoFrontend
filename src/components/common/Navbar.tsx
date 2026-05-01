@@ -1,10 +1,11 @@
 import * as React from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { Coins, LogOut, Menu, Spade, X } from 'lucide-react'
+import { Coins, LogOut, Menu, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuthStore } from '#/store/useAuthStore.ts'
 import { Button } from '#/components/ui/button.tsx'
 import { useMeQuery } from '#/queries/accounts/user.ts'
+import logo from '#/assets/common/logo.png'
 
 export function Navbar() {
   const { data: user } = useMeQuery()
@@ -27,9 +28,11 @@ export function Navbar() {
           onClick={() => setIsOpen(false)}
           className="mr-auto flex items-center gap-2 no-underline"
         >
-          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-red-500 via-red-700 to-red-900 shadow-[0_0_20px_rgba(220,38,38,0.6)]">
-            <Spade size={14} className="text-white" />
-          </span>
+          <img
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-red-500 via-red-700 to-red-900 shadow-[0_0_20px_rgba(220,38,38,0.6)]"
+            alt="logo"
+            src={logo}
+          />
 
           <span className="text-[1.1rem] font-bold tracking-wide text-white">
             MyCasino
