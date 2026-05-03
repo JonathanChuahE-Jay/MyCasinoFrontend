@@ -37,21 +37,24 @@ interface AuthState {
   refreshToken: string | null
   user: AuthUserType | null
   isAuthenticated: boolean
+  isHydrated: boolean
 }
 
 interface AuthActions {
   setAuth: (access: string, refresh: string, user: AuthUserType) => void
   clearAuth: () => void
+  logout: () => void
   hydrate: () => void
 }
 
 export const useAuthStore = create<AuthState & AuthActions>((set) => ({
-  accessToken: getCookie(ACCESS_COOKIE),
-  refreshToken: getCookie(REFRESH_COOKIE),
-  user: parseUserCookie(),
-  isAuthenticated: !!getCookie(ACCESS_COOKIE),
+  accessToken: null,
+  refreshToken: null,
+  user: null,
+  isAuthenticated: false,
+  isHydrated: false,
 
-  setAuth: (access, refresh, user) => {
+   setAuth: (access, refresh, user) => {
     setCookie(ACCESS_COOKIE, access, 1)
     setCookie(REFRESH_COOKIE, refresh, 3)
     setCookie(USER_COOKIE, JSON.stringify(user), 3)
@@ -65,18 +68,26 @@ export const useAuthStore = create<AuthState & AuthActions>((set) => ({
     set({ accessToken: null, refreshToken: null, user: null, isAuthenticated: false })
   },
 
+  logout: () => {
+    deleteCookie(ACCESS_COOKIE)
+    deleteCookie(REFRESH_COOKIE)
+    deleteCookie(USER_COOKIE)
+    set({ accessToken: null, refreshToken: null, user: null, isAuthenticated: false })
+  },
+
   hydrate: () => {
     set({
       accessToken: getCookie(ACCESS_COOKIE),
       refreshToken: getCookie(REFRESH_COOKIE),
       user: parseUserCookie(),
       isAuthenticated: !!getCookie(ACCESS_COOKIE),
+      isHydrated: true,
     })
   },
 }))
 
-// Selector helpers — use these to avoid inline selectors recreating on every render
 export const selectUser = (s: AuthState & AuthActions) => s.user
 export const selectIsAuthenticated = (s: AuthState & AuthActions) => s.isAuthenticated
 export const selectAccessToken = (s: AuthState & AuthActions) => s.accessToken
 export const selectRefreshToken = (s: AuthState & AuthActions) => s.refreshToken
+export const selectIsHydrated = (s: AuthState & AuthActions) => s.isHydrated

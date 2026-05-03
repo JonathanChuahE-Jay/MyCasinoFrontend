@@ -38,7 +38,7 @@ export function useSlotMachine(machineId: string) {
   const [jackpotSession, setJackpotSession] =
     React.useState<JackpotSession | null>(null)
 
-  const audioRef = React.useRef<HTMLAudioElement | null>(null)
+  const audioRefs = React.useRef<(HTMLAudioElement | null)[]>([])
   const spinIdRef = React.useRef(0)
   const spinningRef = React.useRef(false)
   const pendingTimeoutsRef = React.useRef<ReturnType<typeof setTimeout>[]>([])
@@ -89,7 +89,6 @@ export function useSlotMachine(machineId: string) {
     window.addEventListener('resize', calc)
     return () => window.removeEventListener('resize', calc)
   }, [])
-
   const cols = machine?.cols ?? 3
   const rows = machine?.rows ?? 3
   const creditOptions = machine?.credits_per_spin ?? []
@@ -98,11 +97,17 @@ export function useSlotMachine(machineId: string) {
     creditOptions.find((o) => o.credit_per_spin === selectedCredit) ??
     creditOptions[0]
 
+  React.useEffect(() => {
+    if (!machine?.machine_reel_sound) return
+
+    audioRefs.current = Array.from({ length: cols }, () => {
+      const audio = new Audio(machine.machine_reel_sound as string)
+      audio.loop = true
+      return audio
+    })
+  }, [machine, cols])
+
   function finishSpin(playResult: PlayResult, spinId: number) {
-    if (audioRef.current) {
-      audioRef.current.pause()
-      audioRef.current.currentTime = 0
-    }
     if (spinId !== spinIdRef.current) return
     if (finishCalledRef.current === spinId) return
     finishCalledRef.current = spinId
@@ -112,7 +117,12 @@ export function useSlotMachine(machineId: string) {
     setSpinning(false)
     setResult(playResult)
     setShowResult(true)
-
+    audioRefs.current.forEach((audio) => {
+      if (audio) {
+        audio.pause()
+        audio.currentTime = 0
+      }
+    })
     const freeSpin = playResult.free_spin
     if (freeSpin?.triggered) {
       const opts = (freeSpin as Record<string, unknown>).options as
@@ -160,11 +170,6 @@ export function useSlotMachine(machineId: string) {
   async function handleSpin() {
     if (!machine) return
 
-    if (!audioRef.current && machine.machine_reel_sound) {
-      audioRef.current = new Audio(machine.machine_reel_sound as string)
-      audioRef.current.loop = true
-    }
-
     if (spinningRef.current) {
       const pending = pendingResultRef.current
       if (pending) {
@@ -190,10 +195,6 @@ export function useSlotMachine(machineId: string) {
             true,
           )
         })
-        if (audioRef.current) {
-          audioRef.current.pause()
-          audioRef.current.currentTime = 0
-        }
       }
       return
     }
@@ -216,11 +217,6 @@ export function useSlotMachine(machineId: string) {
     setSpinning(true)
     setShowResult(false)
     setResult(null)
-
-    if (audioRef.current) {
-      audioRef.current.currentTime = 0
-      audioRef.current.play().catch(() => {})
-    }
 
     let playResult: PlayResult | null = null
 
@@ -270,15 +266,28 @@ export function useSlotMachine(machineId: string) {
     reelRefs.current.forEach((reel, colIdx) => {
       const delay = colIdx * 360
       const tid = setTimeout(() => {
+        const audio = audioRefs.current[colIdx]
+        if (audio) {
+          audio.currentTime = 0
+          audio.play().catch(() => {})
+        }
+
         if (!reel) {
           doneCount++
           if (doneCount === cols) finishSpin(playResult!, currentSpinId)
           return
         }
+
         reel.spinTo(
           colSymbols[colIdx] ?? [],
           colGolds[colIdx] ?? Array(rows).fill(false),
           () => {
+            const audio = audioRefs.current[colIdx]
+            if (audio) {
+              audio.pause()
+              audio.currentTime = 0
+            }
+
             doneCount++
             if (doneCount === cols) finishSpin(playResult!, currentSpinId)
           },

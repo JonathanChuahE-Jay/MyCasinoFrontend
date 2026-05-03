@@ -16,6 +16,7 @@ export const slotSymbolSchema = z.object({
   credits_offset: creditsOffsetSchema,
   is_wildcard: z.boolean(),
   is_free_spin_trigger: z.boolean(),
+  appear_sound: z.union([z.instanceof(File), z.string()])
 })
 
 export type SlotSymbolType = z.infer<typeof slotSymbolSchema>

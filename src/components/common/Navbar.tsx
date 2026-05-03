@@ -10,12 +10,12 @@ import logo from '#/assets/common/logo.png'
 export function Navbar() {
   const { data: user } = useMeQuery()
   const navigate = useNavigate()
-  const clearAuth = useAuthStore((s) => s.clearAuth)
+  const logout = useAuthStore((s) => s.logout)
 
   const [isOpen, setIsOpen] = React.useState(false)
 
   const handleLogout = () => {
-    clearAuth()
+    logout()
     toast.success('Logged out')
     navigate({ to: '/login' }).then(() => setIsOpen(false))
   }

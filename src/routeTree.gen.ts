@@ -9,15 +9,19 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as unauthenticatedRouteRouteImport } from './routes/(unauthenticated)/route'
 import { Route as authenthicatedRouteRouteImport } from './routes/(authenthicated)/route'
 import { Route as authenthicatedIndexRouteImport } from './routes/(authenthicated)/index'
 import { Route as authenthicatedProfileRouteImport } from './routes/(authenthicated)/profile'
-import { Route as unauthenticatedauthRouteRouteImport } from './routes/(unauthenticated)/(auth)/route'
 import { Route as authenthicatedSlotsIndexRouteImport } from './routes/(authenthicated)/slots/index'
 import { Route as unauthenticatedauthRegisterRouteImport } from './routes/(unauthenticated)/(auth)/register'
 import { Route as unauthenticatedauthLoginRouteImport } from './routes/(unauthenticated)/(auth)/login'
 import { Route as authenthicatedSlotsIdRouteImport } from './routes/(authenthicated)/slots/$id'
 
+const unauthenticatedRouteRoute = unauthenticatedRouteRouteImport.update({
+  id: '/(unauthenticated)',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const authenthicatedRouteRoute = authenthicatedRouteRouteImport.update({
   id: '/(authenthicated)',
   getParentRoute: () => rootRouteImport,
@@ -32,11 +36,6 @@ const authenthicatedProfileRoute = authenthicatedProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => authenthicatedRouteRoute,
 } as any)
-const unauthenticatedauthRouteRoute =
-  unauthenticatedauthRouteRouteImport.update({
-    id: '/(unauthenticated)/(auth)',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const authenthicatedSlotsIndexRoute =
   authenthicatedSlotsIndexRouteImport.update({
     id: '/slots/',
@@ -45,15 +44,15 @@ const authenthicatedSlotsIndexRoute =
   } as any)
 const unauthenticatedauthRegisterRoute =
   unauthenticatedauthRegisterRouteImport.update({
-    id: '/register',
+    id: '/(auth)/register',
     path: '/register',
-    getParentRoute: () => unauthenticatedauthRouteRoute,
+    getParentRoute: () => unauthenticatedRouteRoute,
   } as any)
 const unauthenticatedauthLoginRoute =
   unauthenticatedauthLoginRouteImport.update({
-    id: '/login',
+    id: '/(auth)/login',
     path: '/login',
-    getParentRoute: () => unauthenticatedauthRouteRoute,
+    getParentRoute: () => unauthenticatedRouteRoute,
   } as any)
 const authenthicatedSlotsIdRoute = authenthicatedSlotsIdRouteImport.update({
   id: '/slots/$id',
@@ -80,7 +79,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/(authenthicated)': typeof authenthicatedRouteRouteWithChildren
-  '/(unauthenticated)/(auth)': typeof unauthenticatedauthRouteRouteWithChildren
+  '/(unauthenticated)': typeof unauthenticatedRouteRouteWithChildren
   '/(authenthicated)/profile': typeof authenthicatedProfileRoute
   '/(authenthicated)/': typeof authenthicatedIndexRoute
   '/(authenthicated)/slots/$id': typeof authenthicatedSlotsIdRoute
@@ -102,7 +101,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/(authenthicated)'
-    | '/(unauthenticated)/(auth)'
+    | '/(unauthenticated)'
     | '/(authenthicated)/profile'
     | '/(authenthicated)/'
     | '/(authenthicated)/slots/$id'
@@ -113,11 +112,18 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   authenthicatedRouteRoute: typeof authenthicatedRouteRouteWithChildren
-  unauthenticatedauthRouteRoute: typeof unauthenticatedauthRouteRouteWithChildren
+  unauthenticatedRouteRoute: typeof unauthenticatedRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/(unauthenticated)': {
+      id: '/(unauthenticated)'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof unauthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/(authenthicated)': {
       id: '/(authenthicated)'
       path: ''
@@ -139,13 +145,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof authenthicatedProfileRouteImport
       parentRoute: typeof authenthicatedRouteRoute
     }
-    '/(unauthenticated)/(auth)': {
-      id: '/(unauthenticated)/(auth)'
-      path: ''
-      fullPath: ''
-      preLoaderRoute: typeof unauthenticatedauthRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/(authenthicated)/slots/': {
       id: '/(authenthicated)/slots/'
       path: '/slots'
@@ -158,14 +157,14 @@ declare module '@tanstack/react-router' {
       path: '/register'
       fullPath: '/register'
       preLoaderRoute: typeof unauthenticatedauthRegisterRouteImport
-      parentRoute: typeof unauthenticatedauthRouteRoute
+      parentRoute: typeof unauthenticatedRouteRoute
     }
     '/(unauthenticated)/(auth)/login': {
       id: '/(unauthenticated)/(auth)/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof unauthenticatedauthLoginRouteImport
-      parentRoute: typeof unauthenticatedauthRouteRoute
+      parentRoute: typeof unauthenticatedRouteRoute
     }
     '/(authenthicated)/slots/$id': {
       id: '/(authenthicated)/slots/$id'
@@ -194,25 +193,22 @@ const authenthicatedRouteRouteChildren: authenthicatedRouteRouteChildren = {
 const authenthicatedRouteRouteWithChildren =
   authenthicatedRouteRoute._addFileChildren(authenthicatedRouteRouteChildren)
 
-interface unauthenticatedauthRouteRouteChildren {
+interface unauthenticatedRouteRouteChildren {
   unauthenticatedauthLoginRoute: typeof unauthenticatedauthLoginRoute
   unauthenticatedauthRegisterRoute: typeof unauthenticatedauthRegisterRoute
 }
 
-const unauthenticatedauthRouteRouteChildren: unauthenticatedauthRouteRouteChildren =
-  {
-    unauthenticatedauthLoginRoute: unauthenticatedauthLoginRoute,
-    unauthenticatedauthRegisterRoute: unauthenticatedauthRegisterRoute,
-  }
+const unauthenticatedRouteRouteChildren: unauthenticatedRouteRouteChildren = {
+  unauthenticatedauthLoginRoute: unauthenticatedauthLoginRoute,
+  unauthenticatedauthRegisterRoute: unauthenticatedauthRegisterRoute,
+}
 
-const unauthenticatedauthRouteRouteWithChildren =
-  unauthenticatedauthRouteRoute._addFileChildren(
-    unauthenticatedauthRouteRouteChildren,
-  )
+const unauthenticatedRouteRouteWithChildren =
+  unauthenticatedRouteRoute._addFileChildren(unauthenticatedRouteRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   authenthicatedRouteRoute: authenthicatedRouteRouteWithChildren,
-  unauthenticatedauthRouteRoute: unauthenticatedauthRouteRouteWithChildren,
+  unauthenticatedRouteRoute: unauthenticatedRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

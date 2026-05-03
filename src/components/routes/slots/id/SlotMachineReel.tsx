@@ -6,10 +6,16 @@ const STRIP_LENGTH = 40
 
 function buildStrip(n: number, symbolImages: string[]): string[] {
   const imgs = symbolImages.length > 0 ? symbolImages : [placeholder]
-  return Array.from({ length: n }, () => imgs[Math.floor(Math.random() * imgs.length)])
+  return Array.from(
+    { length: n },
+    () => imgs[Math.floor(Math.random() * imgs.length)],
+  )
 }
 
-function buildGoldCoilStrip(preLength: number, resultGoldCol: boolean[]): boolean[] {
+function buildGoldCoilStrip(
+  preLength: number,
+  resultGoldCol: boolean[],
+): boolean[] {
   const pre: boolean[] = []
   let i = 0
   while (i < preLength) {
@@ -25,7 +31,12 @@ function buildGoldCoilStrip(preLength: number, resultGoldCol: boolean[]): boolea
 }
 
 export interface ReelHandle {
-  spinTo: (symbols: string[], resultGoldCol: boolean[], onDone: () => void, snap?: boolean) => void
+  spinTo: (
+    symbols: string[],
+    resultGoldCol: boolean[],
+    onDone: () => void,
+    snap?: boolean,
+  ) => void
 }
 
 interface SlotReelProps {
@@ -35,23 +46,41 @@ interface SlotReelProps {
   reelRef: (h: ReelHandle | null) => void
 }
 
-export function SlotMachineReel({ rows, symbolSize, symbolImages, reelRef }: SlotReelProps) {
+export function SlotMachineReel({
+  rows,
+  symbolSize,
+  symbolImages,
+  reelRef,
+}: SlotReelProps) {
   const stripEl = React.useRef<HTMLDivElement | null>(null)
   const animRef = React.useRef<{ stop: () => void } | null>(null)
   const symbolImagesRef = React.useRef<string[]>(symbolImages)
   symbolImagesRef.current = symbolImages
 
-  const [strip, setStrip] = React.useState<string[]>(() => Array(STRIP_LENGTH).fill(placeholder))
-  const [goldStrip, setGoldStrip] = React.useState<boolean[]>(() => Array(STRIP_LENGTH).fill(false))
+  const [strip, setStrip] = React.useState<string[]>(() =>
+    Array(STRIP_LENGTH).fill(placeholder),
+  )
+  const [goldStrip, setGoldStrip] = React.useState<boolean[]>(() =>
+    Array(STRIP_LENGTH).fill(false),
+  )
 
   const spinTo = React.useCallback(
-    (resultSymbols: string[], resultGoldCol: boolean[], onDone: () => void, snap = false) => {
+    (
+      resultSymbols: string[],
+      resultGoldCol: boolean[],
+      onDone: () => void,
+      snap = false,
+    ) => {
       if (!stripEl.current) return
       if (animRef.current) animRef.current.stop()
 
-      const imgs = symbolImagesRef.current.length > 0 ? symbolImagesRef.current : [placeholder]
+      const imgs =
+        symbolImagesRef.current.length > 0
+          ? symbolImagesRef.current
+          : [placeholder]
       const tail = [...resultSymbols]
-      while (tail.length < rows) tail.unshift(imgs[Math.floor(Math.random() * imgs.length)])
+      while (tail.length < rows)
+        tail.unshift(imgs[Math.floor(Math.random() * imgs.length)])
       const newStrip = [...buildStrip(STRIP_LENGTH - rows, imgs), ...tail]
       setStrip(newStrip)
 
@@ -61,8 +90,14 @@ export function SlotMachineReel({ rows, symbolSize, symbolImages, reelRef }: Slo
 
       const targetY = -((newStrip.length - rows) * symbolSize)
       const duration = snap ? 0.4 : 2.4
-      const ease: [number, number, number, number] = snap ? [0.2, 0, 0.1, 1] : [0.1, 0, 0.15, 1]
-      const anim = animate(stripEl.current, { y: [0, targetY] }, { duration, ease })
+      const ease: [number, number, number, number] = snap
+        ? [0.2, 0, 0.1, 1]
+        : [0.1, 0, 0.15, 1]
+      const anim = animate(
+        stripEl.current,
+        { y: [0, targetY] },
+        { duration, ease },
+      )
       animRef.current = anim
       anim.then(() => {
         animRef.current = null
@@ -95,8 +130,12 @@ export function SlotMachineReel({ rows, symbolSize, symbolImages, reelRef }: Slo
             style={{
               width: symbolSize,
               height: symbolSize,
-              background: goldStrip[i] ? 'rgba(245,158,11,0.22)' : 'transparent',
-              borderBottom: goldStrip[i] ? '1px solid rgba(245,158,11,0.35)' : undefined,
+              background: goldStrip[i]
+                ? 'rgba(245,158,11,0.22)'
+                : 'transparent',
+              borderBottom: goldStrip[i]
+                ? '1px solid rgba(245,158,11,0.35)'
+                : undefined,
             }}
           >
             <img
@@ -104,7 +143,11 @@ export function SlotMachineReel({ rows, symbolSize, symbolImages, reelRef }: Slo
               alt=""
               draggable={false}
               className="block select-none"
-              style={{ width: symbolSize * 0.7, height: symbolSize * 0.7, objectFit: 'contain' }}
+              style={{
+                width: symbolSize * 0.7,
+                height: symbolSize * 0.7,
+                objectFit: 'contain',
+              }}
             />
           </div>
         ))}
@@ -117,7 +160,8 @@ export function SlotMachineReel({ rows, symbolSize, symbolImages, reelRef }: Slo
       <div
         className="absolute inset-0 z-[3] pointer-events-none"
         style={{
-          background: 'linear-gradient(to bottom,rgba(0,0,0,0.5) 0%,transparent 20%,transparent 80%,rgba(0,0,0,0.5) 100%)',
+          background:
+            'linear-gradient(to bottom,rgba(0,0,0,0.5) 0%,transparent 20%,transparent 80%,rgba(0,0,0,0.5) 100%)',
         }}
       />
     </div>
