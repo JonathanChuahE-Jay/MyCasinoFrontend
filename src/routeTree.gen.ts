@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as unauthenticatedRouteRouteImport } from './routes/(unauthenticated)/route'
 import { Route as authenthicatedRouteRouteImport } from './routes/(authenthicated)/route'
 import { Route as authenthicatedIndexRouteImport } from './routes/(authenthicated)/index'
+import { Route as authenthicatedTransactionsRouteImport } from './routes/(authenthicated)/transactions'
 import { Route as authenthicatedProfileRouteImport } from './routes/(authenthicated)/profile'
 import { Route as authenthicatedSlotsIndexRouteImport } from './routes/(authenthicated)/slots/index'
 import { Route as unauthenticatedauthRegisterRouteImport } from './routes/(unauthenticated)/(auth)/register'
@@ -31,6 +32,12 @@ const authenthicatedIndexRoute = authenthicatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => authenthicatedRouteRoute,
 } as any)
+const authenthicatedTransactionsRoute =
+  authenthicatedTransactionsRouteImport.update({
+    id: '/transactions',
+    path: '/transactions',
+    getParentRoute: () => authenthicatedRouteRoute,
+  } as any)
 const authenthicatedProfileRoute = authenthicatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -62,6 +69,7 @@ const authenthicatedSlotsIdRoute = authenthicatedSlotsIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/profile': typeof authenthicatedProfileRoute
+  '/transactions': typeof authenthicatedTransactionsRoute
   '/': typeof authenthicatedIndexRoute
   '/slots/$id': typeof authenthicatedSlotsIdRoute
   '/login': typeof unauthenticatedauthLoginRoute
@@ -70,6 +78,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/profile': typeof authenthicatedProfileRoute
+  '/transactions': typeof authenthicatedTransactionsRoute
   '/': typeof authenthicatedIndexRoute
   '/slots/$id': typeof authenthicatedSlotsIdRoute
   '/login': typeof unauthenticatedauthLoginRoute
@@ -81,6 +90,7 @@ export interface FileRoutesById {
   '/(authenthicated)': typeof authenthicatedRouteRouteWithChildren
   '/(unauthenticated)': typeof unauthenticatedRouteRouteWithChildren
   '/(authenthicated)/profile': typeof authenthicatedProfileRoute
+  '/(authenthicated)/transactions': typeof authenthicatedTransactionsRoute
   '/(authenthicated)/': typeof authenthicatedIndexRoute
   '/(authenthicated)/slots/$id': typeof authenthicatedSlotsIdRoute
   '/(unauthenticated)/(auth)/login': typeof unauthenticatedauthLoginRoute
@@ -91,18 +101,27 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/profile'
+    | '/transactions'
     | '/'
     | '/slots/$id'
     | '/login'
     | '/register'
     | '/slots/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/profile' | '/' | '/slots/$id' | '/login' | '/register' | '/slots'
+  to:
+    | '/profile'
+    | '/transactions'
+    | '/'
+    | '/slots/$id'
+    | '/login'
+    | '/register'
+    | '/slots'
   id:
     | '__root__'
     | '/(authenthicated)'
     | '/(unauthenticated)'
     | '/(authenthicated)/profile'
+    | '/(authenthicated)/transactions'
     | '/(authenthicated)/'
     | '/(authenthicated)/slots/$id'
     | '/(unauthenticated)/(auth)/login'
@@ -136,6 +155,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof authenthicatedIndexRouteImport
+      parentRoute: typeof authenthicatedRouteRoute
+    }
+    '/(authenthicated)/transactions': {
+      id: '/(authenthicated)/transactions'
+      path: '/transactions'
+      fullPath: '/transactions'
+      preLoaderRoute: typeof authenthicatedTransactionsRouteImport
       parentRoute: typeof authenthicatedRouteRoute
     }
     '/(authenthicated)/profile': {
@@ -178,6 +204,7 @@ declare module '@tanstack/react-router' {
 
 interface authenthicatedRouteRouteChildren {
   authenthicatedProfileRoute: typeof authenthicatedProfileRoute
+  authenthicatedTransactionsRoute: typeof authenthicatedTransactionsRoute
   authenthicatedIndexRoute: typeof authenthicatedIndexRoute
   authenthicatedSlotsIdRoute: typeof authenthicatedSlotsIdRoute
   authenthicatedSlotsIndexRoute: typeof authenthicatedSlotsIndexRoute
@@ -185,6 +212,7 @@ interface authenthicatedRouteRouteChildren {
 
 const authenthicatedRouteRouteChildren: authenthicatedRouteRouteChildren = {
   authenthicatedProfileRoute: authenthicatedProfileRoute,
+  authenthicatedTransactionsRoute: authenthicatedTransactionsRoute,
   authenthicatedIndexRoute: authenthicatedIndexRoute,
   authenthicatedSlotsIdRoute: authenthicatedSlotsIdRoute,
   authenthicatedSlotsIndexRoute: authenthicatedSlotsIndexRoute,

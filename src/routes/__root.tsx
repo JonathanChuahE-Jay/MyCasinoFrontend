@@ -12,6 +12,9 @@ import { useEffect } from 'react'
 
 import TanStackQueryDevtools from '../integrations/tanstack-query/devtools'
 import { Navbar } from '../components/common/Navbar.tsx'
+import { Footer } from '../components/common/Footer.tsx'
+import { CasinoBackground } from '../components/common/CasinoBackground.tsx'
+import { LoadingScreen } from '../components/common/LoadingScreen.tsx'
 import appCss from '../styles.css?url'
 
 import type { QueryClient } from '@tanstack/react-query'
@@ -46,23 +49,19 @@ function RootLayout() {
   }, [])
 
   if (!isHydrated) {
-    // todo: add own loading screen
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-red-500/20 border-t-red-500" />
-          <span className="text-sm font-medium tracking-widest text-red-500/70 uppercase">
-            Loading
-          </span>
-        </div>
-      </div>
-    )
+    return <LoadingScreen />
   }
 
   return (
     <>
+      <CasinoBackground />
       {!isAuthPage && <Navbar />}
-      <Outlet />
+      <div className="flex min-h-[calc(100vh-3.75rem)] flex-col">
+        <div className="flex-1">
+          <Outlet />
+        </div>
+        {!isAuthPage && <Footer />}
+      </div>
     </>
   )
 }

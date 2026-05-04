@@ -1,8 +1,23 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Check, Coins, Copy, Gift, Phone, Shield, User } from 'lucide-react'
+import {
+  Check,
+  Coins,
+  Copy,
+  Gift,
+  KeyRound,
+  Phone,
+  Shield,
+  User,
+} from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { selectUser, useAuthStore } from '#/store/useAuthStore.ts'
+import { motion } from 'motion/react'
+import { selectUser, useAuthStore } from '#/store/useAuthStore'
+import { Input } from '#/components/ui/input'
+import { Label } from '#/components/ui/label'
+import { Button } from '#/components/ui/button'
+import { useChangePassword } from '#/queries/transactions'
+import { handleApiError } from '#/lib/handle-api-error'
 
 export const Route = createFileRoute('/(authenthicated)/profile')({
   component: ProfilePage,
@@ -42,175 +57,182 @@ function ProfilePage() {
   ]
 
   return (
-    <div style={{ minHeight: 'calc(100vh - 3.75rem)', padding: '2.5rem 0' }}>
-      <div className="page-wrap" style={{ maxWidth: '600px' }}>
-        {/* Header */}
-        <div
-          className="rise-in"
-          style={{ textAlign: 'center', marginBottom: '2.5rem' }}
+    <section className="min-h-[calc(100vh-3.75rem)] py-10">
+      <div className="page-wrap max-w-2xl">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mb-10 text-center"
         >
-          <div
-            style={{
-              width: '5rem',
-              height: '5rem',
-              borderRadius: '9999px',
-              background:
-                'radial-gradient(circle at 30% 30%, #ef4444, #991b1b 70%, #450a0a)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              margin: '0 auto 1.25rem',
-              boxShadow: '0 0 40px rgba(220,38,38,0.4)',
-            }}
-          >
-            <User size={28} color="#fff" />
+          <div className="casino-emblem mx-auto mb-5">
+            <User size={28} />
           </div>
-          <h1
-            className="display-title"
-            style={{
-              fontSize: '1.75rem',
-              fontWeight: 800,
-              margin: '0 0 0.25rem',
-            }}
-          >
+          <h1 className="display-title text-3xl font-extrabold">
             Your Profile
           </h1>
-          <p
-            style={{
-              color: 'var(--casino-text-mute)',
-              margin: 0,
-              fontSize: '0.88rem',
-            }}
-          >
-            Member since {new Date(Date.now()).toLocaleDateString()}
+          <p className="mt-1 text-sm text-muted-foreground">
+            Member since {new Date().toLocaleDateString()}
           </p>
-        </div>
+        </motion.div>
 
-        {/* Info Card */}
-        <div
-          className="casino-card"
-          style={{
-            borderRadius: '1rem',
-            overflow: 'hidden',
-            marginBottom: '1rem',
-          }}
+        {/* Info card */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.05 }}
+          className="casino-card mb-4 overflow-hidden rounded-2xl"
         >
           {fields.map(({ icon, label, value, highlight }, i) => (
             <div
               key={label}
-              style={{
-                padding: '1rem 1.5rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                borderBottom:
-                  i < fields.length - 1
-                    ? '1px solid var(--casino-line-soft)'
-                    : undefined,
-              }}
+              className={`flex items-center justify-between px-6 py-4 ${
+                i < fields.length - 1 ? 'border-b border-white/5' : ''
+              }`}
             >
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.625rem',
-                  color: 'var(--casino-text-mute)',
-                  fontSize: '0.85rem',
-                }}
-              >
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 {icon}
                 {label}
               </div>
               <div
-                style={{
-                  fontWeight: 700,
-                  fontSize: '0.9rem',
-                  color: highlight
-                    ? 'var(--casino-gold)'
-                    : 'var(--casino-text)',
-                }}
+                className={`text-sm font-bold ${
+                  highlight ? 'text-yellow-400' : 'text-white'
+                }`}
               >
                 {value}
               </div>
             </div>
           ))}
-        </div>
+        </motion.div>
 
-        {/* Referral Code */}
-        <div
-          className="casino-card"
-          style={{ borderRadius: '1rem', padding: '1.25rem 1.5rem' }}
+        {/* Referral */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="casino-card mb-4 rounded-2xl p-5"
         >
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              color: 'var(--casino-text-mute)',
-              fontSize: '0.78rem',
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              marginBottom: '0.75rem',
-            }}
-          >
-            <Gift size={13} />
-            Referral Code
+          <div className="mb-3 flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
+            <Gift size={13} /> Referral Code
           </div>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '0.75rem 1rem',
-              borderRadius: '0.625rem',
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid var(--casino-line-soft)',
-            }}
-          >
-            <span
-              className="display-title"
-              style={{
-                fontSize: '1.5rem',
-                letterSpacing: '0.15em',
-                color: 'var(--casino-gold)',
-              }}
-            >
+          <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-4 py-3">
+            <span className="display-title text-2xl tracking-[0.15em] text-yellow-400">
               {user.referral_code}
             </span>
-            <button
-              onClick={copyReferral}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                padding: '0.4rem 0.85rem',
-                borderRadius: '0.5rem',
-                border: '1px solid var(--casino-line)',
-                background: 'transparent',
-                color: 'var(--casino-text-soft)',
-                fontSize: '0.8rem',
-                cursor: 'pointer',
-              }}
-            >
+            <Button onClick={copyReferral} className="border-white/10">
               {copied ? (
-                <Check size={13} color="#4ade80" />
+                <Check size={13} className="text-green-400" />
               ) : (
                 <Copy size={13} />
               )}
               {copied ? 'Copied' : 'Copy'}
-            </button>
+            </Button>
           </div>
-          <p
-            style={{
-              fontSize: '0.78rem',
-              color: 'var(--casino-text-mute)',
-              margin: '0.625rem 0 0',
-            }}
-          >
+          <p className="mt-2 text-xs text-muted-foreground">
             Share this code with friends to earn referral bonuses.
           </p>
-        </div>
+        </motion.div>
+
+        {/* Change Password */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
+          className="casino-card rounded-2xl p-5"
+        >
+          <ChangePasswordSection />
+        </motion.div>
       </div>
-    </div>
+    </section>
+  )
+}
+
+function ChangePasswordSection() {
+  const { mutate, isPending } = useChangePassword()
+  const [current, setCurrent] = useState('')
+  const [next, setNext] = useState('')
+  const [confirm, setConfirm] = useState('')
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (next !== confirm) {
+      toast.error('New passwords do not match')
+      return
+    }
+    if (next.length < 8) {
+      toast.error('Password must be at least 8 characters')
+      return
+    }
+    mutate(
+      {
+        current_password: current,
+        new_password: next,
+        confirm_password: confirm,
+      },
+      {
+        onSuccess: () => {
+          toast.success('Password updated!')
+          setCurrent('')
+          setNext('')
+          setConfirm('')
+        },
+        onError: handleApiError,
+      },
+    )
+  }
+
+  return (
+    <form onSubmit={submit}>
+      <div className="mb-4 flex items-center gap-2 text-xs uppercase tracking-widest text-muted-foreground">
+        <KeyRound size={13} /> Change Password
+      </div>
+      <div className="grid gap-3">
+        <div className="grid gap-1.5">
+          <Label htmlFor="current">Current password</Label>
+          <Input
+            id="current"
+            type="password"
+            value={current}
+            onChange={(e) => setCurrent(e.target.value)}
+            autoComplete="current-password"
+            required
+          />
+        </div>
+        <div className="grid gap-1.5 sm:grid-cols-2 sm:gap-3">
+          <div className="grid gap-1.5">
+            <Label htmlFor="new">New password</Label>
+            <Input
+              id="new"
+              type="password"
+              value={next}
+              onChange={(e) => setNext(e.target.value)}
+              autoComplete="new-password"
+              required
+              minLength={8}
+            />
+          </div>
+          <div className="grid gap-1.5">
+            <Label htmlFor="confirm">Confirm new</Label>
+            <Input
+              id="confirm"
+              type="password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              autoComplete="new-password"
+              required
+              minLength={8}
+            />
+          </div>
+        </div>
+        <Button
+          type="submit"
+          disabled={isPending}
+          className="mt-2 border-red-500/40 bg-gradient-to-r from-red-600 to-red-500 text-white hover:from-red-500 hover:to-red-400"
+        >
+          <KeyRound size={13} />
+          {isPending ? 'Updating…' : 'Update password'}
+        </Button>
+      </div>
+    </form>
   )
 }

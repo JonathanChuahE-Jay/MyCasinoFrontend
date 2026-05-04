@@ -150,7 +150,7 @@ export function useSlotMachine(machineId: string) {
         autoSpinTimerRef.current = setTimeout(() => {
           autoSpinTimerRef.current = null
           handleSpinRef.current()
-        }, 2000)
+        }, 1000)
       } else {
         isAutoSpinningRef.current = false
         setIsAutoSpinning(false)

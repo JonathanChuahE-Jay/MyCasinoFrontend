@@ -104,6 +104,17 @@ export function createQuerySet<
     })
   }
 
+  function useCollectionAction<TPayload, TResponse>(action: string) {
+    const queryClient = useQueryClient()
+    return useMutation({
+      mutationFn: (data: TPayload) =>
+        KY.post(`${resource}/${action}/`, { json: data }).json<TResponse>(),
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({ queryKey: baseKey })
+      },
+    })
+  }
+
   function useInvalidateAll() {
     const queryClient = useQueryClient()
     return () => queryClient.invalidateQueries({ queryKey: baseKey })
@@ -136,6 +147,7 @@ export function createQuerySet<
     useReplace,
     useDelete,
     useAction,
+    useCollectionAction,
     useInvalidateAll,
     useInvalidate,
     useListAction,

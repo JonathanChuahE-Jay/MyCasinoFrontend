@@ -44,6 +44,7 @@ export function Navbar() {
             Home
           </NavLink>
           <NavLink to="/slots">Slots</NavLink>
+          <NavLink to="/transactions">Transactions</NavLink>
           <NavLink to="/profile">Profile</NavLink>
         </div>
 
@@ -83,6 +84,9 @@ export function Navbar() {
           </MobileLink>
           <MobileLink to="/slots" onClick={() => setIsOpen(false)}>
             Slots
+          </MobileLink>
+          <MobileLink to="/transactions" onClick={() => setIsOpen(false)}>
+            Transactions
           </MobileLink>
           <MobileLink to="/profile" onClick={() => setIsOpen(false)}>
             Profile

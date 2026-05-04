@@ -1,16 +1,22 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { createFileRoute, Outlet, redirect, useNavigate } from '@tanstack/react-router'
 import { useEffect } from 'react'
-import { useNavigate } from '@tanstack/react-router'
-import { selectIsAuthenticated, selectIsHydrated, useAuthStore } from '#/store/useAuthStore.ts'
+import { useAuthStore, selectIsAuthenticated, selectIsHydrated } from '#/store/useAuthStore'
 
 export const Route = createFileRoute('/(authenthicated)')({
+  beforeLoad: () => {
+    if (typeof document === 'undefined') return
+    const hasCookie = document.cookie
+      .split('; ')
+      .some((c) => c.startsWith('mc_access='))
+    if (!hasCookie) throw redirect({ to: '/login', replace: true })
+  },
   component: RouteComponent,
 })
 
 function RouteComponent() {
   const navigate = useNavigate()
-  const isAuthenticated = useAuthStore(selectIsAuthenticated)
   const isHydrated = useAuthStore(selectIsHydrated)
+  const isAuthenticated = useAuthStore(selectIsAuthenticated)
 
   useEffect(() => {
     if (isHydrated && !isAuthenticated) {
@@ -18,7 +24,6 @@ function RouteComponent() {
     }
   }, [isHydrated, isAuthenticated, navigate])
 
-  if (!isHydrated) return null
-
+  if (!isHydrated || !isAuthenticated) return null
   return <Outlet />
 }
